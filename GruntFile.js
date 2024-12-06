@@ -1,6 +1,8 @@
 module.exports = function (grunt) {
     grunt.initConfig({
         pkg: grunt.file.readJSON('package.json'),
+        
+        // Compilar LESS para CSS
         less: {
             development: {
                 files: {
@@ -9,13 +11,15 @@ module.exports = function (grunt) {
             },
             production: {
                 options: {
-                    compress: true,
+                    compress: true, // Minificar o CSS em produção
                 },
                 files: {
                     'dist/styles/main.min.css': 'src/styles/main.less',
                 },
             },
         },
+        
+        // Assistir mudanças nos arquivos
         watch: {
             less: {
                 files: ['src/styles/**/*.less'],
@@ -24,8 +28,14 @@ module.exports = function (grunt) {
             html: {
                 files: ['src/index.html'],
                 tasks: ['replace:dev'],
+            },
+            js: {
+                files: ['src/scripts/**/*.js'],
+                tasks: ['replace:dev'],
             }
         },
+        
+        // Substituir padrões nos arquivos
         replace: {
             dev: {
                 options: {
@@ -36,7 +46,7 @@ module.exports = function (grunt) {
                         },
                         {
                             match: 'ENDERECO_DO_JS',
-                            replacement: '../src/scripts/main.js',
+                            replacement: './scripts/main.js',
                         },
                     ],
                 },
@@ -58,20 +68,22 @@ module.exports = function (grunt) {
                         },
                         {
                             match: 'ENDERECO_DO_JS',
-                            replacement: './styles/main.min.js',
-                        }
+                            replacement: './scripts/main.min.js',
+                        },
                     ],
                 },
                 files: [
                     {
                         expand: true,
                         flatten: true,
-                        src: ['src/index.html'], 
+                        src: ['src/index.html'],
                         dest: 'dist/',
                     },
                 ],
             },
         },
+        
+        // Minificar o HTML
         htmlmin: {
             dist: {
                 options: {
@@ -79,20 +91,25 @@ module.exports = function (grunt) {
                     collapseWhitespace: true,
                 },
                 files: {
-                    'dist/index.html': 'src/index.html', 
+                    'dist/index.html': 'src/index.html',
                 },
             },
         },
+
+        // Limpar pastas desnecessárias
         clean: ['prebuild'],
+
+        // Minificar o JavaScript
         uglify: {
             target: {
                 files: {
-                    'dist/scripts/main,js': 'src/scripts/main.js'
-                }
-            }
+                    'dist/scripts/main.min.js': 'src/scripts/main.js',
+                },
+            },
         }
     });
 
+    // Carregar as tarefas do Grunt
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-replace');
@@ -100,6 +117,9 @@ module.exports = function (grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-uglify');
 
+    // Tarefa default para observar as alterações
     grunt.registerTask('default', ['watch']);
+
+    // Tarefa de build para produzir a versão de produção
     grunt.registerTask('build', ['less:production', 'htmlmin:dist', 'replace:dist', 'clean', 'uglify']);
 };
